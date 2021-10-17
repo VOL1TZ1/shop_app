@@ -13,9 +13,10 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
-  var name;
-  var email;
-  var password;
+  TextEditingController nameC = TextEditingController();
+  TextEditingController emailC = TextEditingController();
+  TextEditingController passC = TextEditingController();
+  bool showPassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -45,14 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.person),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      else {
-                        name=value;
-                      }
-                    },
+                    controller: nameC,
                   ),
                   const SizedBox(
                     height: 20,
@@ -64,35 +58,30 @@ class _RegisterPageState extends State<RegisterPage> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.email),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      else {
-                        email=value;
-                      }
-                    },
+                    controller: emailC,
                   ),
                   const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
+                    obscureText: showPassword,
                     keyboardType: TextInputType.visiblePassword,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: Icon(Icons.remove_red_eye),
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock),
+                      suffix: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
+                        icon: !showPassword
+                            ? const Icon(Icons.visibility)
+                            : const Icon(Icons.visibility_off),
+                      ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      else {
-                        password=value;
-                      }
-                    },
+                    controller: passC,
                   ),
                   const SizedBox(
                     height: 15,
@@ -105,12 +94,26 @@ class _RegisterPageState extends State<RegisterPage> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: MaterialButton(
-                      onPressed: () {
-                        print("Successful Register.");
-                        if (_formKey.currentState!.validate()) {
-                          postRegister(email, password, name,context);
+                      onPressed: () async{
+                        var response = await http.post(Uri.parse('https://retail.amit-learning.com/api/login'),
+                          headers: <String,String>{
+                            'Content-Type' : 'application/json'
+                          },
+                          body: jsonEncode(<String,String>{
+                            'email':emailC.text,
+                            'password':passC.text
+                          }),);
+                        if(response.statusCode ==201){
+                          Navigator.push(context, MaterialPageRoute(builder: (context){
+                            return const Scaffold(
+                              body: Center(child: Text('Registered Successfully')),
+                            );
+                          }));
                         }
-                      } ,
+                        else{
+                          print('done');
+                        }
+                      },
                       color: Colors.blue,
                       child: const Text(
                         'RESISTER',
@@ -153,25 +156,5 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
-  }
-
-  postRegister(String email, String password,String name, BuildContext context) async {
-    final response = await http.post(
-      Uri.parse('https://retail.amit-learning.com/api/register'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(<String, String>{
-        'name': name,
-        'email': email,
-        "password": password,
-      }),
-    );
-    if (response.statusCode == 201) {
-      print(jsonDecode(response.body)["token"]);
-    } else {
-      throw Exception("failed to make the account");
-    }
-    Navigator.push(context, MaterialPageRoute(builder: (context) =>  const home_screen()),);
   }
 }
