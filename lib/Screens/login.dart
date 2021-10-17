@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shop_app/Screens/register.dart';
-
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {

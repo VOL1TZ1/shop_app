@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:shop_app/CustomWidgets/custom_counter.dart';
 import 'package:shop_app/Objects/product.dart';
-
 import '../constants.dart';
 
 class ProductPage extends StatelessWidget {
